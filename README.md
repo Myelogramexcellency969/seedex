@@ -28,13 +28,35 @@ curl -fsSL https://github.com/wishworldbetter/seedex/releases/latest/download/in
 
 ## 使用
 
-启动桥接守护进程:
+### 前台运行(快速试用)
 
 ```bash
 seedex-cli run
 ```
 
-生成 iPhone 配对二维码:
+终端关掉就停了,适合首次试用或调试。
+
+### 后台服务(推荐,长期使用)
+
+注册为用户级系统服务(macOS 用 launchd,Linux 用 systemd),开机自启、终端关掉照样跑:
+
+```bash
+seedex-cli service install   # 注册服务
+seedex-cli service start     # 启动
+seedex-cli service status    # 查状态
+```
+
+其他常用命令:
+
+```bash
+seedex-cli service stop      # 停止
+seedex-cli service restart   # 重启
+seedex-cli service uninstall # 移除
+```
+
+### 配对 iPhone
+
+服务跑起来后,生成配对二维码:
 
 ```bash
 seedex-cli qrcode
@@ -42,7 +64,7 @@ seedex-cli qrcode
 
 打开 iPhone 上的 Seedex App,扫码即可建立加密通道,桌面历史记录会自动同步过来。
 
-更多命令:
+### 更多命令
 
 ```bash
 seedex-cli --help
