@@ -59,9 +59,27 @@ seedex-cli service uninstall  # 移除
 
 ## 升级
 
+**Homebrew 用户：**
+
 ```bash
+seedex-cli service stop
+seedex-cli service uninstall
 brew upgrade seedex-cli
+seedex-cli service install
+seedex-cli service start
 ```
+
+**curl 安装的用户：**
+
+```bash
+seedex-cli service stop
+seedex-cli service uninstall
+curl -fsSL https://github.com/wishworldbetter/seedex/releases/latest/download/install.sh | sh
+seedex-cli service install
+seedex-cli service start
+```
+
+> 必须先 `service uninstall`：`seedex` 是 launchd 全局唯一服务名，plist 里写死了二进制路径，不重装会继续跑老版本。
 
 ## 卸载
 
