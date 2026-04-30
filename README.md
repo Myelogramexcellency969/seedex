@@ -14,109 +14,127 @@
 - **本地优先** — 所有数据存你自己的 Mac,iPhone 只是个加密视图层
 - **企业网络友好** — 自动继承 shell 代理 / SSL 证书配置,公司网下也能直连
 
-## 快速开始
+---
 
-### Step 1 — 安装
+## macOS
+
+### 安装
 
 ```bash
 brew install wishworldbetter/tap/seedex-cli
 ```
 
-或用 curl:
-
-```bash
-curl -fsSL https://github.com/wishworldbetter/seedex/releases/latest/download/install.sh | sh
-```
-
-支持 macOS(Intel / Apple Silicon)和 Linux(x86_64 / arm64)。
-
-### Step 2 — 启动
-
-```bash
-seedex-cli start
-```
-
-进程脱离终端在后台跑,关掉终端不死。子进程默认继承当前 shell 的环境变量,公司代理 / API key 之类无需额外配置。
-
-要 **开机自启**(系统服务模式,launchd / systemd 托管):
+### 启动
 
 ```bash
 seedex-cli service install
 ```
 
-### Step 3 — 扫码配对 iPhone
+第一次会弹 **"Allow Seedex in Background"**,允许即可。命令内部会自动 start + 健康检查,卡住会给清晰提示。
+
+### 配对 iPhone
 
 ```bash
 seedex-cli qrcode
 ```
 
-打开 iPhone 上的 Seedex App,扫码即可建立加密通道。Mac 上的全部 Claude Code 历史会话立即出现在 iPhone 上,从此可以从手机上直接发起或接管对话。
+打开 iPhone 上的 Seedex App,扫码即可。
 
----
-
-## 后台管理
-
-`seedex-cli start` 起的后台:
-
-```bash
-seedex-cli status     # 查状态
-seedex-cli stop       # 停掉
-seedex-cli restart    # 重启
-```
-
-`seedex-cli service install` 起的系统服务:
-
-```bash
-seedex-cli service status     # 查状态
-seedex-cli service stop       # 停止
-seedex-cli service restart    # 重启
-seedex-cli service uninstall  # 移除
-```
-
-## 企业网络 / 代理
-
-如果你的 Mac 出口必须走 HTTP 代理或公司自签 CA(常见于公司网络下访问 Anthropic API),在你的 shell 里 `export` 过 `https_proxy` / `http_proxy` / `SSL_CERT_FILE` / `NODE_EXTRA_CA_CERTS` 等之后:
-
-- **`seedex-cli start`** — daemon 从你 shell fork,自动继承这些变量,**零配置**
-- **`seedex-cli service install`** — install 时自动捕获 shell 中的网络 env 写进 plist / systemd unit;代理变了之后跑一次:
-
-  ```bash
-  seedex-cli service refresh-env
-  ```
-
-不需要手动编辑 plist。
-
-## 升级
+### 升级
 
 ```bash
 brew update && brew upgrade seedex-cli
+seedex-cli service refresh-env
 ```
 
-升级后:
+`refresh-env` 会把 plist 重写成新版的入口和环境,不需要 uninstall。
 
-- `start` 模式:
-
-  ```bash
-  seedex-cli restart
-  ```
-
-- `service` 模式:
-
-  ```bash
-  seedex-cli service refresh-env
-  ```
-
-  会把 plist / systemd unit 重写成新版的入口和环境,不需要 uninstall + install。
-
-> **v0.1.x → v0.2.0 首次升级**:`service refresh-env` 会自动把老的 `ProgramArguments=["run"]` 切到新的 `daemon --mode service` 入口。
-
-## 卸载
+### 卸载
 
 ```bash
-seedex-cli stop                # 如果在用 start 模式
-seedex-cli service uninstall   # 如果在用 service 模式
+seedex-cli service uninstall
 brew uninstall seedex-cli
 ```
+
+---
+
+## Linux
+
+### 安装
+
+```bash
+curl -fsSL https://github.com/wishworldbetter/seedex/releases/latest/download/install.sh | sh
+```
+
+支持 x86_64 / arm64,需要 systemd(几乎所有现代发行版都满足)。
+
+### 启动
+
+```bash
+seedex-cli service install
+```
+
+会写 `~/.config/systemd/user/seedex.service` 并自动 start。如果你**完全登出**(关 SSH、退出 GUI 会话)后仍想让它跑,启用 lingering:
+
+```bash
+loginctl enable-linger "$USER"
+```
+
+### 配对手机
+
+```bash
+seedex-cli qrcode
+```
+
+### 升级
+
+重新跑一次安装脚本,然后:
+
+```bash
+seedex-cli service refresh-env
+```
+
+### 卸载
+
+```bash
+seedex-cli service uninstall
+rm -f /usr/local/bin/seedex-cli   # 或 ~/.local/bin/seedex-cli, 看 install.sh 装哪
+```
+
+---
+
+## Windows
+
+暂不官方支持。推荐在 **WSL2 (Ubuntu)** 下走 Linux 路径。
+
+---
+
+## 高级:不要开机自启
+
+如果只是临时跑、CI、或者不想注册系统服务:
+
+```bash
+seedex-cli start              # 后台跑,继承当前 shell env,关机就停
+seedex-cli stop               # 停
+seedex-cli restart            # 重启
+seedex-cli status             # 查状态
+```
+
+跟 `service install` 的区别:这条路径**不写 plist / systemd unit**,纯 self-daemonize,关机就停;但好处是 macOS 上**不触发** Background Items 系统权限弹窗,适合快速验证或不希望开机自启的场景。
+
+---
+
+## 企业网络 / 代理
+
+如果你的 Mac / Linux 出口必须走 HTTP 代理或公司自签 CA(常见于公司网络下访问 Anthropic API),在你 shell 里 `export` 过 `https_proxy` / `http_proxy` / `SSL_CERT_FILE` / `NODE_EXTRA_CA_CERTS` 之后:
+
+- **`seedex-cli service install`** — install 时自动捕获 shell 中的网络 env 写进 plist / systemd unit
+- **代理变了** — 跑 `seedex-cli service refresh-env` 重新捕获,daemon 自动用新 env 重启
+- **`seedex-cli start`** — 子进程默认继承 shell env,零配置
+
+捕获的变量白名单:`HTTP_PROXY` / `HTTPS_PROXY` / `ALL_PROXY` / `NO_PROXY`(含小写)+ `SSL_CERT_FILE` / `SSL_CERT_DIR` / `NODE_EXTRA_CA_CERTS`。不抓 API key / token / secret,凭据走各自的 keychain / credential 文件。
+
+---
 
 ## License
 
