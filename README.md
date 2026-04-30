@@ -109,7 +109,42 @@ rm -f /usr/local/bin/seedex-cli   # 或 ~/.local/bin/seedex-cli, 看 install.sh 
 
 ## Windows
 
-暂不官方支持。推荐在 **WSL2 (Ubuntu)** 下走 Linux 路径。
+当前只支持 **WSL2 (Ubuntu)**,在 WSL distro 里跑。
+
+### 安装
+
+```bash
+curl -fsSL https://github.com/wishworldbetter/seedex/releases/latest/download/install.sh | sh
+```
+
+### 启动
+
+```bash
+seedex-cli start
+```
+
+WSL2 上不走 systemd user service(`loginctl enable-linger` 在 WSL 里行为不稳定),直接用 `start` 模式后台跑。WSL distro 不 shutdown 就一直在。
+
+### 配对手机
+
+```bash
+seedex-cli qrcode
+```
+
+### 升级
+
+重新跑一次安装脚本,然后:
+
+```bash
+seedex-cli restart
+```
+
+### 卸载
+
+```bash
+seedex-cli stop
+rm -f /usr/local/bin/seedex-cli   # 或 ~/.local/bin/seedex-cli
+```
 
 ---
 
@@ -130,15 +165,9 @@ seedex-cli status             # 查状态
 
 ## 企业网络 / 代理
 
-shell 里 export 代理后正常启动即可,`service install` 会自动把代理写进 plist / systemd unit。
+shell 里 export 过 `*_PROXY` / `SSL_CERT_*` / `NODE_EXTRA_CA_CERTS` 之后,`service install` 会自动把这些变量写进 plist / systemd unit,代理立刻生效。
 
-```bash
-export https_proxy=http://127.0.0.1:7890
-seedex-cli service install
-seedex-cli service start
-```
-
-代理变了跑 `seedex-cli service refresh-env`。
+代理变了跑 `seedex-cli service refresh-env` 重新捕获,daemon 自动用新 env 重启。
 
 ---
 
