@@ -46,7 +46,7 @@ seedex-cli qrcode
 ### 升级
 
 ```bash
-brew upgrade seedex-cli
+brew update && brew upgrade seedex-cli
 seedex-cli service restart
 ```
 
